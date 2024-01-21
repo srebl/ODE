@@ -1,2 +1,3 @@
-package at.fhtechnikumwien.ode.service;public class Client {
+package at.fhtechnikumwien.ode.service;
+public class Client {
 }

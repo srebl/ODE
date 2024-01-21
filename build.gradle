@@ -27,6 +27,13 @@ tasks.withType(JavaCompile) {
 application {
     mainModule = 'at.fhtechnikumwien.ode'
     mainClass = 'at.fhtechnikumwien.ode.HelloApplication'
+    applicationName = 'client'
+}
+
+application {
+    mainModule = 'at.fhtechnikumwien.ode.service'
+    mainModule = 'at.fhtechnikumwien.ode.service.Server'
+    applicationName = 'service'
 }
 
 javafx {
@@ -35,9 +42,10 @@ javafx {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    //testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    //testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
 
 test {
