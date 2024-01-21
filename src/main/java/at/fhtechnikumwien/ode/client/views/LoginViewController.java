@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Objects;
 
 public class LoginViewController implements MyView {
@@ -47,19 +48,15 @@ public class LoginViewController implements MyView {
         }
 
         try{
-            //Socket socket = new Socket("localhost", 4711);
-            //ClientEnviroment.instance().setSocket(socket);
+            Socket socket = new Socket("localhost", 4711);
+            ClientEnviroment.instance().setSocket(socket);
             LogInMessage msg = new LogInMessage(number);
-            ObjectMapper mapper = msg.getMapper();
-            /*PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder().build();
-            mapper.activateDefaultTyping(ptv); // default to using DefaultTyping.OBJECT_AND_NON_CONCRETE
-            mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);*/
-
-            String data_str = mapper.writeValueAsString(msg);
-            System.out.println(data_str);
-            byte[] data_byte = mapper.writeValueAsBytes(msg);
-            //var dos = socket.getOutputStream();
-            //dos.write(data_byte);
+            msg.number = number;
+            byte[] data_byte = msg.serialize();
+            System.out.println("sending message");
+            var dos = socket.getOutputStream();
+            dos.write(data_byte);
+            dos.flush();
         } catch (Exception e){
             e.printStackTrace();
         }

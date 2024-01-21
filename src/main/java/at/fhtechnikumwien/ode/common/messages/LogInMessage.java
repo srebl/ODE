@@ -3,12 +3,13 @@ package at.fhtechnikumwien.ode.common.messages;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class LogInMessage extends Message<LogInMessage>{
     public String number;
 
-    //public LogInMessage(){};
+    public LogInMessage(){};
 
     public LogInMessage(String number){
         this.number = number;
@@ -16,20 +17,21 @@ public class LogInMessage extends Message<LogInMessage>{
 
     @Override
     public byte[] getPayload() {
-        ObjectMapper mapper = new ObjectMapper();
-        String str_val = "";
         try {
-             str_val = mapper.writeValueAsString(this);
-            byte[] blub = mapper.writeValueAsBytes(this);
+            ObjectMapper mapper = getMapper();
+            return mapper.writeValueAsBytes(this);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        return number.getBytes();
     }
 
     @Override
     public LogInMessage deserialize(byte[] msg) {
-        this.number = new String(msg, StandardCharsets.UTF_8);
-        return this;
+        ObjectMapper mapper = getMapper();
+        try {
+            return mapper.readValue(msg, LogInMessage.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

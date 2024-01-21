@@ -14,30 +14,50 @@ public class Server {
     public static ConcurrentHashMap<String, ClientHandler> loggedClients = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(4711);
-        Socket socket;
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(4711);
+            Socket socket;
 
-        while(true){
-            socket = serverSocket.accept();
+            while(true){
+                socket = serverSocket.accept();
 
-            // obtain input and output streams
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                // obtain input and output streams
+                DataInputStream dis = new DataInputStream(socket.getInputStream());
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
-            // Create a new handler object for handling this request.
-            UUID id = UUID.randomUUID();
-            ClientHandler mtch = new ClientHandler(socket, id, dis, dos);
+                // Create a new handler object for handling this request.
+                UUID id = UUID.randomUUID();
+                ClientHandler mtch = new ClientHandler(socket, id, dis, dos);
+                System.out.println("created new ClientHandler with id: " + id);
 
-            // Create a new Thread with this object.
-            Thread t = new Thread(mtch);
+                // Create a new Thread with this object.
+                Thread t = new Thread(mtch);
 
-            System.out.println("Adding this client to active client list");
+                System.out.println("Adding this client to active client list");
 
-            // add this client to active clients list
-            clients.put(id, mtch);
+                // add this client to active clients list
+                clients.put(id, mtch);
 
-            // start the thread.
-            t.start();
+                // start the thread.
+                t.start();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            try {
+                serverSocket.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void close(Socket s){
+        try {
+            s.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

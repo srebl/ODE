@@ -18,23 +18,25 @@ public class MessageParser {
             char c;
             StringBuilder builder = new StringBuilder();
             do{
-                c = dis.readChar();
+                byte[] data = dis.readNBytes(1);
+                c = (char) data[0];
                 builder.append(c);
-                i += Character.BYTES;
-                //current = ((int)(data[i++])) << Byte.SIZE + data[i++];
-                //builder.append((char)current);
+                System.out.printf("%c", c);
+                i++;
             } while (c != Message.delimiter);
-
+            System.out.println("deserialize data");
             //remove trailing delimiter'#'
-            builder.deleteCharAt(builder.length()-1);
-            System.out.printf("class name is %s\n", builder);
-            Class<?> cls = Class.forName(builder.toString());
+            String className = builder.substring(0, builder.length()-2);
+            System.out.printf("class name is %s\n", className);
+            Class<?> cls = Class.forName(className);
             //get class by reflection
             msg = (Message<?>) cls.getDeclaredConstructor().newInstance();
             //deserialize data into Message
             byte[] data = dis.readNBytes(msgLength - i);
             msg = msg.deserialize(data);
-            System.out.println("deserialized msg");
+            String json = msg.getMapper().writeValueAsString(msg);
+            System.out.println(json);
+            System.out.println("finished reading msg");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -69,6 +69,10 @@ public class ClientHandler implements Runnable{
     }
 
     private void handleLogin(LogInMessage msg){
+        if (isloggedin){
+            System.out.println("user already logged in");
+            return;
+        }
         String num = msg.number;
         if(num == null || num.isBlank()){
             System.out.println("login: invalid number.");
@@ -77,7 +81,7 @@ public class ClientHandler implements Runnable{
 
         if(Server.loggedClients.putIfAbsent(num, this) == null){
             Server.clients.remove(this.id);
-
+            isloggedin = true;
         } else {
             System.out.println("login: another client is already logged in.");
         }
