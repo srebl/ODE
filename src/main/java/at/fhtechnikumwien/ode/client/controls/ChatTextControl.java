@@ -1,11 +1,28 @@
 package at.fhtechnikumwien.ode.client.controls;
 
+import at.fhtechnikumwien.ode.client.views.MyView;
+import at.fhtechnikumwien.ode.common.Result;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
-public class ChatTextControl {
+import java.io.IOException;
+
+public class ChatTextControl implements MyView {
+    public ChatTextControl(){
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat-text-control.fxml"));
+        //fxmlLoader.setRoot(this);
+        //fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
     @FXML
     private Label textLb;
     @FXML
@@ -30,5 +47,10 @@ public class ChatTextControl {
 
     public void setText(String text){
         textLb.setText(text);
+    }
+
+    @Override
+    public Result<Parent, String> getAsNode() {
+        return null;
     }
 }

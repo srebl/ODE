@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class Finder {
-    public List<Message> findAll(String from, String to){
+    public List<Message<?>> findAll(String from, String to){
         return null;
     }
 
@@ -43,7 +43,7 @@ public class Finder {
     }
 
     private boolean matchSearchMessage(String from, String to, String searchStr, TextMessage msg){
-        final Pattern pattern = Pattern.compile(Pattern.quote(to), Pattern.CASE_INSENSITIVE);
+        final Pattern pattern = Pattern.compile(Pattern.quote(searchStr), Pattern.CASE_INSENSITIVE);
         return (msg.from.equals(from) && msg.to.equals(to) || msg.from.equals(to) && msg.to.equals(from))
                 && pattern.matcher(msg.msg).find();
     }

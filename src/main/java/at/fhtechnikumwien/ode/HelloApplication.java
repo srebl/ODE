@@ -9,6 +9,8 @@ import at.fhtechnikumwien.ode.common.messages.LogInMessage;
 import at.fhtechnikumwien.ode.common.messages.Message;
 import at.fhtechnikumwien.ode.common.messages.MessageParser;
 import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
+import at.fhtechnikumwien.ode.database.Finder;
+import at.fhtechnikumwien.ode.service.Client;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -40,7 +42,7 @@ public class HelloApplication extends Application implements MainView {
     public static void main(String[] args) {
         try {
             Enviroment.instance().setLogger(new MyLogger("nope"));
-
+            ClientEnviroment.instance().setFinder(new Finder());
             launch();
         } catch (Exception e){
             SocketHandler handler = Enviroment.instance().getSocketHandler();
@@ -57,7 +59,6 @@ public class HelloApplication extends Application implements MainView {
             Enviroment.logg("changeScene: could not get change scene.");
             return Result.err(r_node.getErr());
         }
-        var blub = r_node.unwrap();
         primaryStage.getScene().setRoot(r_node.unwrap());
         return Result.ok(true);
     }

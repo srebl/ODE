@@ -5,6 +5,8 @@ import at.fhtechnikumwien.ode.client.controls.ChatTextControl;
 import at.fhtechnikumwien.ode.common.Result;
 import at.fhtechnikumwien.ode.common.messages.TextMessage;
 import at.fhtechnikumwien.ode.database.Finder;
+import javafx.collections.FXCollections;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,7 +25,7 @@ import javafx.scene.input.MouseEvent;
 public class SearchChatController implements MyView{
 
     @FXML
-    private ListView<?> chatLv;
+    private ListView<String> chatLv;
 
     @FXML
     private Button searchBtn;
@@ -42,10 +44,11 @@ public class SearchChatController implements MyView{
     private String from = "1234";
     private String to = "4321";
 
-    private ObservableList<ChatTextControl> list;
+    private ObservableList<String> list = FXCollections.observableArrayList();
 
     @FXML
     void onSearchBtnClick(MouseEvent event) {
+        chatLv.setItems(list);
         String str = searchTf.getText();
         if(str == null || str.isBlank())
         {
@@ -57,10 +60,8 @@ public class SearchChatController implements MyView{
         List<TextMessage> lst = finder.findByText(from, to, str.trim());
         list.clear();
         for (var item : lst){
-            ChatTextControl control = new ChatTextControl();
-            control.setText(item.msg);
-            control.setOwnMsg(item.from.equals(from));
-            list.add(control);
+            String tmp = "from: " + item.from + " msg: " + item.msg;
+            list.add(tmp);
         }
     }
 
@@ -68,9 +69,6 @@ public class SearchChatController implements MyView{
     @Override
     public Result<Parent, String> getAsNode() {
         try {
-            var one = getClass().getResource("search-chat.fxml");
-            var two = Objects.requireNonNull(one);
-            var three = FXMLLoader.load(two);
             Parent node = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("search-chat.fxml")));
             return node != null ? Result.ok(node) : Result.err("Created node was null");
         } catch (IOException e) {
