@@ -7,6 +7,7 @@ import at.fhtechnikumwien.ode.common.messages.LogInMessage;
 import at.fhtechnikumwien.ode.common.messages.Message;
 import at.fhtechnikumwien.ode.common.messages.MessageParser;
 import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -55,34 +56,48 @@ public class LoginViewController implements MyView {
     }
 
     private void login(){
-        String number = numberTf.getText();
-        if(number == null || number.isBlank()){
-            messageLb.setText("number is empty.");
-        }
+        Runnable runnable = () -> {
+            String number = numberTf.getText();
+            String labelText = "";
 
-        var res = HelloApplication.initConnection();
-        if (res.isErr()){
-            messageLb.setText(res.getErr());
-        }
 
-        SocketHandler socketHandler = Enviroment.instance().getSocketHandler();
-
-        LogInMessage msg = new LogInMessage(number);
-        msg.number = number;
-        Result<Message<?>, String> r_sock = socketHandler.sendMsgWithAck(msg);
-        if(r_sock.isErr()){
-            messageLb.setText(r_sock.getErr());
-        }
-
-        if(r_sock.unwrap() instanceof ResponseMessage rsp){
-            if(rsp.type == ResponseType.NACK){
-                messageLb.setText("server refused login");
+            if(number == null || number.isBlank()){
+                labelText = "labelTextnumber is empty.";
             }
 
-            ClientEnviroment.instance().setLoggedin(true);
-            var search = new SearchChatController();
-            var mainView = ClientEnviroment.instance().getMainView();
-            mainView.changeScene(search);
-        }
+            var res = HelloApplication.initConnection();
+            if (res.isErr()){
+                labelText = res.getErr();
+            }
+
+            SocketHandler socketHandler = Enviroment.instance().getSocketHandler();
+
+            LogInMessage msg = new LogInMessage(number);
+            msg.number = number;
+            Result<Message<?>, String> r_sock = socketHandler.sendMsgWithAck(msg);
+            if(r_sock.isErr()){
+                labelText = r_sock.getErr();
+            }
+
+            if(r_sock.unwrap() instanceof ResponseMessage rsp){
+                if(rsp.type == ResponseType.NACK){
+                    labelText = "server refused login";
+                }
+
+                ClientEnviroment.instance().setLoggedin(true);
+                var search = new SearchChatController();
+                var mainView = ClientEnviroment.instance().getMainView();
+                mainView.changeScene(search);
+            }
+
+            final String tmp = labelText;
+            Platform.runLater(() -> {
+                messageLb.setText(tmp);
+            });
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.start();
     }
 }

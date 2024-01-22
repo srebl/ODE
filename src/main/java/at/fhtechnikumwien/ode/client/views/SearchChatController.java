@@ -5,6 +5,7 @@ import at.fhtechnikumwien.ode.client.controls.ChatTextControl;
 import at.fhtechnikumwien.ode.common.Result;
 import at.fhtechnikumwien.ode.common.messages.TextMessage;
 import at.fhtechnikumwien.ode.database.Finder;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
@@ -12,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,20 +51,36 @@ public class SearchChatController implements MyView{
     @FXML
     void onSearchBtnClick(MouseEvent event) {
         chatLv.setItems(list);
-        String str = searchTf.getText();
-        if(str == null || str.isBlank())
-        {
-            statusLb.setText("error: search text empty");
-            return;
-        }
-
-        Finder finder = ClientEnviroment.instance().getFinder();
-        List<TextMessage> lst = finder.findByText(from, to, str.trim());
         list.clear();
-        for (var item : lst){
-            String tmp = "from: " + item.from + " msg: " + item.msg;
-            list.add(tmp);
-        }
+        final String str = searchTf.getText();
+
+        Runnable runnable = () -> {
+            String blub = "";
+            final ArrayList<String> msgList = new ArrayList<>();
+            if(str == null || str.isBlank())
+            {
+                blub = "error: search text empty";
+                return;
+            } else {
+                Finder finder = ClientEnviroment.instance().getFinder();
+                List<TextMessage> lst = finder.findByText(from, to, str.trim());
+                for (TextMessage item : lst){
+                    String tmp = "from: " + item.from + " msg: " + item.msg;
+                    msgList.add(tmp);
+                }
+            }
+
+            final String tmp = blub;
+            Platform.runLater(() -> {
+                list.clear();
+                list.addAll(msgList);
+                searchLb.setText(tmp);
+            });
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.start();
     }
 
 
