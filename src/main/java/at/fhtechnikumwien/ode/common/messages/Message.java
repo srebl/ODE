@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 @JsonSubTypes({
         @JsonSubTypes.Type(LogInMessage.class),
+        @JsonSubTypes.Type(ResponseMessage.class),
 })
 public abstract class Message<T extends Message<T>> {
     @JsonIgnore

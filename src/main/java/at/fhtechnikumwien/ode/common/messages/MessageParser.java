@@ -1,12 +1,10 @@
-package at.fhtechnikumwien.ode.service.messages;
-
-import at.fhtechnikumwien.ode.common.messages.Message;
+package at.fhtechnikumwien.ode.common.messages;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
 public class MessageParser {
-    public static Message<?> deserialize(DataInputStream dis, DataOutputStream dos){
+    public static Message<?> receive(DataInputStream dis){
         Message<?> msg = null;
         try
         {
@@ -42,5 +40,18 @@ public class MessageParser {
         }
 
         return msg;
+    }
+
+    public static void send(DataOutputStream dos, Message<?> msg){
+        try
+        {
+            byte[] data = msg.serialize();
+            dos.write(data);
+            dos.flush();
+            String msg_str = new String(data);
+            System.out.printf("send data: %s", msg_str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

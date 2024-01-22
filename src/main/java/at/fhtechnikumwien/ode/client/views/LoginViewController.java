@@ -1,7 +1,13 @@
 package at.fhtechnikumwien.ode.client.views;
 
+import at.fhtechnikumwien.ode.common.Enviroment;
+import at.fhtechnikumwien.ode.common.MyLogger;
+import at.fhtechnikumwien.ode.common.ResponseType;
 import at.fhtechnikumwien.ode.common.Result;
 import at.fhtechnikumwien.ode.common.messages.LogInMessage;
+import at.fhtechnikumwien.ode.common.messages.Message;
+import at.fhtechnikumwien.ode.common.messages.MessageParser;
+import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,21 +48,29 @@ public class LoginViewController implements MyView {
 
     @FXML
     void onLoginBtnClicked(MouseEvent event) {
+        MyLogger logger = Enviroment.instance().getLogger();
         String number = numberTf.getText();
         if(number == null || number.isBlank()){
             messageLb.setText("number is empty.");
         }
 
         try{
-            Socket socket = new Socket("localhost", 4711);
-            ClientEnviroment.instance().setSocket(socket);
+            Socket socket = ClientEnviroment.instance().getSocket();
+            if(socket == null){
+                String serverAddr = Enviroment.instance().getServerAddress();
+                int port = Enviroment.instance().getServerPort();
+                socket = new Socket(serverAddr, port);
+                ClientEnviroment.instance().setSocket(socket);
+            }
             LogInMessage msg = new LogInMessage(number);
             msg.number = number;
-            byte[] data_byte = msg.serialize();
-            System.out.println("sending message");
-            var dos = socket.getOutputStream();
-            dos.write(data_byte);
-            dos.flush();
+            MessageParser.send(null, msg);
+            Message<?> rsp_msg = MessageParser.receive(ClientEnviroment.instance().getDis());
+            if(rsp_msg instanceof ResponseMessage rsp){
+                if(rsp.type == ResponseType.ACK){
+                    ClientEnviroment.instance().setLoggedin(true);
+                }
+            }
         } catch (Exception e){
             e.printStackTrace();
         }

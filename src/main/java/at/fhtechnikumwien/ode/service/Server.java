@@ -1,5 +1,8 @@
 package at.fhtechnikumwien.ode.service;
 
+import at.fhtechnikumwien.ode.common.Enviroment;
+import at.fhtechnikumwien.ode.common.MyLogger;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,6 +17,7 @@ public class Server {
     public static ConcurrentHashMap<String, ClientHandler> loggedClients = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws IOException {
+        Enviroment.instance().setLogger(new MyLogger("nope"));
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(4711);
