@@ -68,6 +68,9 @@ public class SearchChatController implements MyView{
     @Override
     public Result<Parent, String> getAsNode() {
         try {
+            var one = getClass().getResource("search-chat.fxml");
+            var two = Objects.requireNonNull(one);
+            var three = FXMLLoader.load(two);
             Parent node = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("search-chat.fxml")));
             return node != null ? Result.ok(node) : Result.err("Created node was null");
         } catch (IOException e) {

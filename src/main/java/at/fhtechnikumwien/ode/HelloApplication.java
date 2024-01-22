@@ -54,8 +54,10 @@ public class HelloApplication extends Application implements MainView {
         //Parent pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource(fxml)));
         Result<Parent, String> r_node= view.getAsNode();
         if(r_node.isErr()){
+            Enviroment.logg("changeScene: could not get change scene.");
             return Result.err(r_node.getErr());
         }
+        var blub = r_node.unwrap();
         primaryStage.getScene().setRoot(r_node.unwrap());
         return Result.ok(true);
     }
