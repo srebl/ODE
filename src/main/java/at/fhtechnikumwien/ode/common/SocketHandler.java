@@ -4,6 +4,7 @@ import at.fhtechnikumwien.ode.common.messages.Message;
 import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
@@ -11,82 +12,73 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class SocketHandler {
+    private final Socket socket;
+    private final DataInputStream dis;
+    private final DataOutputStream dos;
     private final ConcurrentMap<UUID, CompletableFuture<Result<Message<?>, String>>> callBacks = new ConcurrentHashMap<>();
+    private final MessageHandler handler;
 
-    public Result<Boolean, String> initConnection(){
-        Socket socket = Enviroment.instance().getSocket();
-        String serverAddr = Enviroment.instance().getServerAddress();
-        int port = Enviroment.instance().getServerPort();
-
-        try{
-            if(socket == null){
-                socket = new Socket(serverAddr, port);
-                Enviroment.instance().setSocket(socket);
-            }
-            return Result.ok(true);
-        } catch (IOException e) {
-            Enviroment.instance().getLogger().logg(e.getMessage());
-            return Result.err(e.getMessage());
-        }
+    public SocketHandler(Socket socket, MessageHandler handler) throws IOException {
+        this.socket = socket;
+        this.dis = new DataInputStream(socket.getInputStream());
+        this.dos = new DataOutputStream(socket.getOutputStream());
+        this.handler = handler;
+        new Thread(this::recieveMsgAsync).start();
     }
 
-    public Result<Message<?>, String> sendMsg(Message<?> msg){
+    public ConcurrentMap<UUID, CompletableFuture<Result<Message<?>, String>>> getCallBacks(){
+        return callBacks;
+    }
+
+    public Result<Message<?>, String> sendMsgWithAck(Message<?> msg){
+        Enviroment.logg("start sendMsgWithAck");
         final CompletableFuture<Result<Message<?>, String>> ft = new CompletableFuture<>();
+        Enviroment.logg("send: created future.");
         CompletableFuture<Result<Message<?>, String>> call = callBacks.putIfAbsent(msg.uuid, ft);
+        Enviroment.logg("send: created callback");
         if(call != null){
-            return Result.err("sendMsg: a callback for the message has already been registered.");
+            String str = "sendMsg: a callback for the message has already been registered.";
+            Enviroment.logg(str);
+            return Result.err(str);
         }
 
-        Result<Boolean, String> r_send = SocketHandler.send(msg);
+        Enviroment.logg("sending messsage");
+        Result<Boolean, String> r_send = send(msg);
         if(r_send.isErr()){
             return Result.err(r_send.getErr());
         }
 
         //wait till server answers
         try {
-            return ft.get(2, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            var blub = ft.get(/*2, TimeUnit.SECONDS*/);
+            Enviroment.logg("send msg success");
+            return blub;
+        } catch (InterruptedException | ExecutionException /*| TimeoutException*/ e) {
             callBacks.remove(msg.uuid);
+            Enviroment.logg(e.getMessage());
             return Result.err(e.getMessage());
         }
     }
 
+    public Result<Boolean, String> sendMsg(Message<?> msg){
+        return send(msg);
+    }
+
     void recieveMsgAsync(){
+
         while (true){
-            try {
-                if(Enviroment.instance().getDis() == null) {
-                    wait(1000);
-                    continue;
-                }
-                var res = SocketHandler.receive();
-                if(res.isErr()){
-                    Enviroment.instance().getLogger().logg(res.getErr());
-                } else {
-                    handleRescMsg(res.unwrap());
-                }
-            } catch (InterruptedException e) {
-                Enviroment.instance().getLogger().logg(e.getMessage());
+            Enviroment.logg("start recieving");
+            var res = receive();
+            if(res.isErr()){
+                Enviroment.instance().getLogger().logg(res.getErr());
+            } else {
+                handler.handleMessage(res.unwrap(), this);
             }
         }
+
     }
 
-    private void handleRescMsg(Message<?> msg){
-        if(msg instanceof ResponseMessage response) {
-            CompletableFuture<Result<Message<?>, String>> callBack =
-                    callBacks.remove(response.responeOfUuid);
-            if (callBack == null) {
-                //ignore msg
-                return;
-            }
-            callBack.complete(Result.ok(msg));
-        }
-    }
-
-    private static synchronized Result<Message<?>, String> receive(){
-        DataInputStream dis = Enviroment.instance().getDis();
-        if(dis == null){
-            return Result.err("no input stream");
-        }
+    private Result<Message<?>, String> receive(){
         try
         {
             System.out.println("get message length");
@@ -123,21 +115,34 @@ public class SocketHandler {
         }
     }
 
-    private static synchronized Result<Boolean, String> send(Message<?> msg){
-        var dos = Enviroment.instance().getDos();
-        if(dos == null){
-            return Result.err("no output stream.");
-        }
+    private Result<Boolean, String> send(Message<?> msg){
         try
         {
+            Enviroment.logg("send: start serialize");
             byte[] data = msg.serialize();
+            String msg_str = new String(data);
+            Enviroment.logg("data to send: %s" + msg_str);
             dos.write(data);
             dos.flush();
-            String msg_str = new String(data);
-            System.out.printf("send data: %s", msg_str);
+            Enviroment.logg("send data: %s" + msg_str);
             return Result.ok(true);
         } catch (Exception e) {
+            Enviroment.logg(e.getMessage());
             return Result.err(e.getMessage());
+        }
+    }
+
+    public void closeSocket(){
+        close(dis);
+        close(dos);
+        close(socket);
+    }
+
+    private void close(AutoCloseable closeable){
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            return;
         }
     }
 }

@@ -12,12 +12,10 @@ public class Enviroment {
     private Enviroment(){}
 
     private MyLogger myLogger;
-    private final String serverAddress = "localhost";
-    private final int serverPort = 4711;
 
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private SocketHandler socketHandler;
+
+    private MessageHandler messageHandler;
 
     public static synchronized Enviroment instance(){
         if(instance == null){
@@ -34,33 +32,24 @@ public class Enviroment {
         this.myLogger = myLogger;
     }
 
-    public String getServerAddress() {
-        return serverAddress;
+
+    public SocketHandler getSocketHandler() {
+        return socketHandler;
     }
 
-    public int getServerPort() {
-        return serverPort;
+    public void setSocketHandler(SocketHandler socketHandler) {
+        this.socketHandler = socketHandler;
     }
 
-    public void setSocket(Socket s){
-        this.socket = s;
-        try {
-            this.dis = new DataInputStream(s.getInputStream());
-            this.dos = new DataOutputStream(s.getOutputStream());
-        } catch (IOException e) {
-            Enviroment.instance().getLogger().logg(e.toString());
-        }
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
     }
 
-    public Socket getSocket(){
-        return socket;
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
     }
 
-    public DataInputStream getDis() {
-        return dis;
-    }
-
-    public DataOutputStream getDos() {
-        return dos;
+    public static void logg(String msg){
+        instance().getLogger().logg(msg);
     }
 }

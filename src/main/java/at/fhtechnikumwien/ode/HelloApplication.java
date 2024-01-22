@@ -1,17 +1,22 @@
 package at.fhtechnikumwien.ode;
 
 import at.fhtechnikumwien.ode.client.ClientEnviroment;
+import at.fhtechnikumwien.ode.client.ClientMessageHandler;
 import at.fhtechnikumwien.ode.client.views.LoginViewController;
 import at.fhtechnikumwien.ode.client.views.MyView;
-import at.fhtechnikumwien.ode.common.Enviroment;
-import at.fhtechnikumwien.ode.common.MyLogger;
-import at.fhtechnikumwien.ode.common.Result;
+import at.fhtechnikumwien.ode.common.*;
+import at.fhtechnikumwien.ode.common.messages.LogInMessage;
+import at.fhtechnikumwien.ode.common.messages.Message;
+import at.fhtechnikumwien.ode.common.messages.MessageParser;
+import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class HelloApplication extends Application implements MainView {
 
@@ -19,7 +24,6 @@ public class HelloApplication extends Application implements MainView {
 
     @Override
     public void start(Stage stage) throws IOException {
-        Enviroment.instance().setLogger(new MyLogger("nope"));
         ClientEnviroment.instance().setMainView(this);
 
         this.primaryStage = stage;
@@ -34,7 +38,16 @@ public class HelloApplication extends Application implements MainView {
     }
 
     public static void main(String[] args) {
-        launch();
+        try {
+            Enviroment.instance().setLogger(new MyLogger("nope"));
+
+            launch();
+        } catch (Exception e){
+            SocketHandler handler = Enviroment.instance().getSocketHandler();
+            if (handler != null){
+                handler.closeSocket();
+            }
+        }
     }
 
     public Result<Boolean, String> changeScene(MyView view) {
@@ -45,5 +58,22 @@ public class HelloApplication extends Application implements MainView {
         }
         primaryStage.getScene().setRoot(r_node.unwrap());
         return Result.ok(true);
+    }
+
+    public static Result<Boolean, String> initConnection(){
+        try{
+            SocketHandler socketHandler = Enviroment.instance().getSocketHandler();
+            if(socketHandler == null){
+                String serverAddr = "localhost";
+                int port = 4711;
+                Socket socket = new Socket(serverAddr, port);
+                MessageHandler msgHandler = new ClientMessageHandler();
+                socketHandler = new SocketHandler(socket, msgHandler);
+                Enviroment.instance().setSocketHandler(socketHandler);
+            }
+            return Result.ok(true);
+        } catch (IOException e) {
+            return Result.err(e.getMessage());
+        }
     }
 }

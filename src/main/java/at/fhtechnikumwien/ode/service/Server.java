@@ -27,12 +27,11 @@ public class Server {
                 socket = serverSocket.accept();
 
                 // obtain input and output streams
-                DataInputStream dis = new DataInputStream(socket.getInputStream());
-                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
                 // Create a new handler object for handling this request.
                 UUID id = UUID.randomUUID();
-                ClientHandler mtch = new ClientHandler(socket, id, dis, dos);
+                Enviroment.logg("create Client handler");
+                ClientHandler mtch = new ClientHandler(socket, id, null, null);
                 System.out.println("created new ClientHandler with id: " + id);
 
                 // Create a new Thread with this object.
