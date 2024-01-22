@@ -1,5 +1,6 @@
 package at.fhtechnikumwien.ode.client.views;
 
+import at.fhtechnikumwien.ode.client.ClientEnviroment;
 import at.fhtechnikumwien.ode.common.Enviroment;
 import at.fhtechnikumwien.ode.common.MyLogger;
 import at.fhtechnikumwien.ode.common.ResponseType;
@@ -8,7 +9,6 @@ import at.fhtechnikumwien.ode.common.messages.LogInMessage;
 import at.fhtechnikumwien.ode.common.messages.Message;
 import at.fhtechnikumwien.ode.common.messages.MessageParser;
 import at.fhtechnikumwien.ode.common.messages.ResponseMessage;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -55,17 +55,17 @@ public class LoginViewController implements MyView {
         }
 
         try{
-            Socket socket = ClientEnviroment.instance().getSocket();
+            Socket socket = Enviroment.instance().getSocket();
             if(socket == null){
                 String serverAddr = Enviroment.instance().getServerAddress();
                 int port = Enviroment.instance().getServerPort();
                 socket = new Socket(serverAddr, port);
-                ClientEnviroment.instance().setSocket(socket);
+                Enviroment.instance().setSocket(socket);
             }
             LogInMessage msg = new LogInMessage(number);
             msg.number = number;
             MessageParser.send(null, msg);
-            Message<?> rsp_msg = MessageParser.receive(ClientEnviroment.instance().getDis());
+            Message<?> rsp_msg = MessageParser.receive(Enviroment.instance().getDis());
             if(rsp_msg instanceof ResponseMessage rsp){
                 if(rsp.type == ResponseType.ACK){
                     ClientEnviroment.instance().setLoggedin(true);

@@ -1,4 +1,4 @@
-package at.fhtechnikumwien.ode.client.views;
+package at.fhtechnikumwien.ode.client;
 
 import at.fhtechnikumwien.ode.MainView;
 import at.fhtechnikumwien.ode.common.Enviroment;
@@ -13,9 +13,6 @@ public class ClientEnviroment {
 
     private static ClientEnviroment instance;
     private MainView mainView;
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
     private boolean isLoggedin;
     private Finder finder;
 
@@ -34,28 +31,6 @@ public class ClientEnviroment {
 
     public MainView getMainView(){
         return mainView;
-    }
-
-    public void setSocket(Socket s){
-        this.socket = s;
-        try {
-            this.dis = new DataInputStream(s.getInputStream());
-            this.dos = new DataOutputStream(s.getOutputStream());
-        } catch (IOException e) {
-            Enviroment.instance().getLogger().logg(e.toString());
-        }
-    }
-
-    public Socket getSocket(){
-        return socket;
-    }
-
-    public DataInputStream getDis() {
-        return dis;
-    }
-
-    public DataOutputStream getDos() {
-        return dos;
     }
 
     public boolean isLoggedin() {

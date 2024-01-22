@@ -1,5 +1,6 @@
 package at.fhtechnikumwien.ode.client.views;
 
+import at.fhtechnikumwien.ode.client.ClientEnviroment;
 import at.fhtechnikumwien.ode.client.controls.ChatTextControl;
 import at.fhtechnikumwien.ode.common.Result;
 import at.fhtechnikumwien.ode.common.messages.TextMessage;

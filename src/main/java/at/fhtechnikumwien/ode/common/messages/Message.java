@@ -2,6 +2,7 @@ package at.fhtechnikumwien.ode.common.messages;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -22,6 +23,8 @@ public abstract class Message<T extends Message<T>> {
     final byte[] nameBytes = className.getBytes();
     @JsonIgnore
     public static final char delimiter = '#';
+
+    public UUID uuid = UUID.randomUUID();
 
     @JsonIgnore
     public abstract byte[] getPayload();

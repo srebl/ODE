@@ -1,5 +1,10 @@
 package at.fhtechnikumwien.ode.common;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
 public class Enviroment {
 
     private static Enviroment instance;
@@ -7,8 +12,12 @@ public class Enviroment {
     private Enviroment(){}
 
     private MyLogger myLogger;
-    private String serverAddress = "localhost";
-    private int serverPort = 4711;
+    private final String serverAddress = "localhost";
+    private final int serverPort = 4711;
+
+    private Socket socket;
+    private DataInputStream dis;
+    private DataOutputStream dos;
 
     public static synchronized Enviroment instance(){
         if(instance == null){
@@ -29,15 +38,29 @@ public class Enviroment {
         return serverAddress;
     }
 
-    public void setServerAddress(String serverAddress) {
-        this.serverAddress = serverAddress;
-    }
-
     public int getServerPort() {
         return serverPort;
     }
 
-    public void setServerPort(int serverPort) {
-        this.serverPort = serverPort;
+    public void setSocket(Socket s){
+        this.socket = s;
+        try {
+            this.dis = new DataInputStream(s.getInputStream());
+            this.dos = new DataOutputStream(s.getOutputStream());
+        } catch (IOException e) {
+            Enviroment.instance().getLogger().logg(e.toString());
+        }
+    }
+
+    public Socket getSocket(){
+        return socket;
+    }
+
+    public DataInputStream getDis() {
+        return dis;
+    }
+
+    public DataOutputStream getDos() {
+        return dos;
     }
 }

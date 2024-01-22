@@ -1,6 +1,6 @@
 package at.fhtechnikumwien.ode;
 
-import at.fhtechnikumwien.ode.client.views.ClientEnviroment;
+import at.fhtechnikumwien.ode.client.ClientEnviroment;
 import at.fhtechnikumwien.ode.client.views.LoginViewController;
 import at.fhtechnikumwien.ode.client.views.MyView;
 import at.fhtechnikumwien.ode.common.Enviroment;
