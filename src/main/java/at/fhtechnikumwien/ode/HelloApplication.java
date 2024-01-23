@@ -41,7 +41,7 @@ public class HelloApplication extends Application implements MainView {
 
     public static void main(String[] args) {
         try {
-            Enviroment.instance().setLogger(new MyLogger("nope"));
+            Enviroment.instance().setLogger(new MyLogger(null));
             ClientEnviroment.instance().setFinder(new Finder());
             launch();
         } catch (Exception e){
