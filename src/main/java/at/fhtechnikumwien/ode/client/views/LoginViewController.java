@@ -60,10 +60,14 @@ public class LoginViewController implements MyView {
             String number = numberTf.getText();
             String labelText = "";
 
-
             if(number == null || number.isBlank()){
-                labelText = "labelTextnumber is empty.";
+                Platform.runLater(() -> {
+                    messageLb.setText("labelTextnumber is empty.");
+                });
+                return;
             }
+
+            number = number.trim();
 
             var res = HelloApplication.initConnection();
             if (res.isErr()){
@@ -81,11 +85,14 @@ public class LoginViewController implements MyView {
 
             if(r_sock.unwrap() instanceof ResponseMessage rsp){
                 if(rsp.type == ResponseType.NACK){
-                    labelText = "server refused login";
+                    Platform.runLater(() -> {
+                        messageLb.setText("server refused login");
+                    });
+                    return;
                 }
 
-                ClientEnviroment.instance().setLoggedin(true);
-                var search = new SearchChatController();
+                ClientEnviroment.instance().setNumber(number);
+                var search = new SearchChatController(number);
                 var mainView = ClientEnviroment.instance().getMainView();
                 mainView.changeScene(search);
             }
