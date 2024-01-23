@@ -1,8 +1,11 @@
 package at.fhtechnikumwien.ode.common.messages;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 public class TextMessage extends ChatMessage<TextMessage>{
     public String msg;
 
@@ -19,7 +22,6 @@ public class TextMessage extends ChatMessage<TextMessage>{
 
     @Override
     public byte[] getPayload() {
-
         return msg.getBytes();
     }
 
